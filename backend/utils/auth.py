@@ -21,11 +21,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 # Hash password
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    # bcrypt max 72 bytes → truncate
+    safe_password = password.encode("utf-8")[:72]
+    return pwd_context.hash(safe_password)
 
 # Verify password
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    safe_password = plain_password.encode("utf-8")[:72]
+    return pwd_context.verify(safe_password, hashed_password)
 
 # Create JWT token
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
