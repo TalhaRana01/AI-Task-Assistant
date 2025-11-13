@@ -1,14 +1,25 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+from typing import Optional, List
+from datetime import datetime
 
+# User create request schema
 class UserCreate(BaseModel):
-    username: str
-    email: str
+    name: str
+    email: EmailStr
     password: str
 
-class UserOut(BaseModel):
+# User response schema (for API responses)
+class UserResponse(BaseModel):
     id: int
-    username: str
-    email: str
+    name: str
+    email: EmailStr
+    created_at: datetime
 
     class Config:
-        orm_mode = True
+        orm_mode = True  # SQLAlchemy model ko Pydantic object main convert karne ke liye
+
+# User with tasks schema
+class UserWithTasks(UserResponse):
+    tasks: Optional[List] = []
+
+
