@@ -8,6 +8,11 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
 
+
+# User login request schema
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 # User response schema (for API responses)
 class UserResponse(BaseModel):
     id: int
