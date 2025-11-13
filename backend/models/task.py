@@ -1,14 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
-from sqlalchemy.orm import relationship
-from backend.database import Base
 
-class Task(Base):
-    __tablename__ = "tasks"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(Text)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User")
 
 
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
@@ -23,8 +13,8 @@ class Task(Base):
     title = Column(String(200), nullable=False)
     description = Column(String(500), nullable=True)
     status = Column(String(50), default="pending")  # pending, in-progress, completed
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime)
+    updated_at = Column(DateTime, default=datetime, onupdate=datetime)
 
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", backref="tasks")
