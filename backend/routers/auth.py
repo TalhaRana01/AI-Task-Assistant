@@ -1,6 +1,3 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from backend.schemas.user import UserCreate, UserResponse, UserLogin
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from backend.database import get_db
@@ -27,9 +24,9 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     # Hash password and create user
     hashed_password = get_password_hash(user.password)
     new_user = User(
-        name=user.name,
+        username=user.name,
         email=user.email,
-        password_hash=hashed_password
+        hashed_password=hashed_password
     )
     db.add(new_user)
     db.commit()
@@ -46,12 +43,12 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
-    if not verify_password(user.password, db_user.password_hash):
+    if not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
     # Create JWT token
     access_token_expires = timedelta(hours=1)
-    token = create_access_token(data={"user_id": db_user.id}, expires_delta=access_token_expires)
+    token = create_access_token(data={"sub": str(db_user.id)}, expires_delta=access_token_expires)
     return {"access_token": token, "token_type": "bearer"}

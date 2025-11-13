@@ -8,26 +8,29 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models.user import User
 
-# Secret key aur algorithm
-SECRET_KEY = "your_secret_key_here"
+# Secret key & JWT settings
+SECRET_KEY = "your_super_secret_key_here"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# OAuth2 token scheme
+# OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+# Truncate password to 72 bytes (bcrypt limit)
+def truncate_password(password: str) -> bytes:
+    return password.encode("utf-8")[:72]
 
 # Hash password
 def get_password_hash(password: str) -> str:
-    # bcrypt max 72 bytes → truncate
-    safe_password = password.encode("utf-8")[:72]
+    safe_password = truncate_password(password)
     return pwd_context.hash(safe_password)
 
 # Verify password
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    safe_password = plain_password.encode("utf-8")[:72]
+    safe_password = truncate_password(plain_password)
     return pwd_context.verify(safe_password, hashed_password)
 
 # Create JWT token
@@ -38,7 +41,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-# Get current logged-in user
+# Get current user
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
